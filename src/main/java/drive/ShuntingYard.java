@@ -14,6 +14,13 @@ public class ShuntingYard {
     //input: the math expression as a string
     //parsed result will stored in Tokens linked list
     public void parse(String input){
+        for (int i = 0; i < input.length(); i++)
+        {
+
+            char character = input.charAt(i);
+            this.Tokens.append(String.valueOf(character));
+
+        }
 
     }
 
@@ -34,7 +41,26 @@ public class ShuntingYard {
      */
     //take the tokens from Tokens queue, and stored the reversed polish expression in ReversePolish queue
     public void process(){
-        //to do
+        int size = this.Tokens.getLength();
+        Node node = this.Tokens.Head;
+        while (true)
+        {
+            String stringToken = node.Data;
+            node = node.NextNode;
+
+            if (node.NextNode == null)
+            {
+                break;
+            }
+
+            char token = stringToken.charAt(0);
+            if (Character.isDigit(token))
+                this.ReversePolish.append(String.valueOf(token));
+
+            else if (token == '+' || token == '-' || token == '*' || token == '/')
+                this.ReversePolish
+
+        }
     }
 
     /*
