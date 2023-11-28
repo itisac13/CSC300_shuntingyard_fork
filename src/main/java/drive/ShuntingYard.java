@@ -1,13 +1,20 @@
 package drive;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ShuntingYard {
     public LinkedList Tokens;
 
     public OutputQueue ReversePolish;
+    public Stack operatorStack;
+
+
 
     public ShuntingYard(){
         this.Tokens = new LinkedList();
         this.ReversePolish = new OutputQueue();
+        this.operatorStack = new OpStack();
     }
 
     //parse a math expression into a linked list
@@ -41,24 +48,40 @@ public class ShuntingYard {
      */
     //take the tokens from Tokens queue, and stored the reversed polish expression in ReversePolish queue
     public void process(){
+
+        Map<Character, Integer> precedence = new HashMap<>();
+        precedence.put('+', 1);
+        precedence.put('-', 1);
+        precedence.put('*', 2);
+        precedence.put('/', 2);
         int size = this.Tokens.getLength();
         Node node = this.Tokens.Head;
         while (true)
         {
             String stringToken = node.Data;
+            char charToken = stringToken.charAt(0);
             node = node.NextNode;
 
             if (node.NextNode == null)
             {
                 break;
             }
-
-            char token = stringToken.charAt(0);
-            if (Character.isDigit(token))
-                this.ReversePolish.append(String.valueOf(token));
-
-            else if (token == '+' || token == '-' || token == '*' || token == '/')
-                this.ReversePolish
+            // char c = stringToken.charAt(0);
+            if (Character.isDigit(stringToken.charAt(0))) {
+                ReversePolish.append(stringToken);
+            } else if ( charToken == '(') {
+                operatorStack.append(stringToken);
+            } else if (charToken == ')') {
+                while (!operatorStack.isEmpty() && operatorStack.peek().Data.charAt(0) != '(') {
+                    ReversePolish.append(operatorStack.pop().Data);
+                }
+                operatorStack.pop(); // Discard '('
+            } else if (precedence.containsKey(stringToken.charAt(0))) {
+                while (!operatorStack.isEmpty() && precedence.get(stringToken.charAt(0)) <= precedence.getOrDefault(operatorStack.peek().Data.charAt(0), 0)) {
+                    ReversePolish.append(operatorStack.pop().Data);
+                }
+                operatorStack.push(stringToken);
+            }
 
         }
     }
