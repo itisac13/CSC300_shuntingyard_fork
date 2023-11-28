@@ -1,8 +1,24 @@
 package drive;
-public abstract class Stack extends LinkedList {
-    public abstract void push(String data);
+public class Stack<T> extends LinkedList<T> {
 
-    public abstract Node pop();
+    public void push(T data) {
+        prepend(data);
+    }
 
-    public abstract Node peek();
+    public Node<T> pop() {
+        if (isEmpty()) {
+            return null;
+        }
+
+        Node<T> removedNode = this.Head;
+        removeHead();
+        return removedNode;
+    }
+
+    public Node<T> peek() {
+        if (isEmpty()) {
+            return null;
+        }
+        return this.Head;
+    }
 }

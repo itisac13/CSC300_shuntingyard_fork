@@ -4,32 +4,79 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ShuntingYard {
-    public LinkedList Tokens;
+    public LinkedList<String> Tokens;
 
-    public OutputQueue ReversePolish;
-    public Stack operatorStack;
-
+    public Queue<String> ReversePolish;
+    public Stack<Character> operatorStack;
 
 
     public ShuntingYard(){
-        this.Tokens = new LinkedList();
-        this.ReversePolish = new OutputQueue();
-        this.operatorStack = new OpStack();
+        this.Tokens = new LinkedList<String>();
+        this.ReversePolish = new Queue<String>();
+        this.operatorStack = new Stack<Character>();
+    }
+
+    private static int performOperation(char operator, int operand1, int operand2) {
+        switch (operator) {
+            case '^':
+                return (int) Math.pow(operand1, operand2);
+            case '+':
+                return operand1 + operand2;
+            case '-':
+                return operand1 - operand2;
+            case '*':
+                return operand1 * operand2;
+            case '/':
+                return operand1 / operand2;
+            default:
+                throw new IllegalArgumentException("Invalid operator");
+        }
+    }
+
+    private static boolean isOperator(char c) {
+        return c == '+' || c == '-' || c == '*' || c == '/' || c == '^';
+    }
+
+    private boolean isNumeric(String str) {
+        return str.matches("-?\\d+(\\.\\d+)?"); // Check if the string is a number
+    }
+
+    private int precedence(char operator) {
+        if (operator == '+' || operator == '-') {
+            return 1;
+        } else if (operator == '*' || operator == '/') {
+            return 2;
+        } else if (operator == '^') {
+            return 3;
+        }
+        return -1;
     }
 
     //parse a math expression into a linked list
     //input: the math expression as a string
     //parsed result will stored in Tokens linked list
-    public void parse(String input){
-        for (int i = 0; i < input.length(); i++)
-        {
+    public void parse(String expression) {
+        StringBuilder numBuilder = new StringBuilder();
 
-            char character = input.charAt(i);
-            this.Tokens.append(String.valueOf(character));
-
+        for (char c : expression.toCharArray()) {
+            if (Character.isDigit(c)) {
+                numBuilder.append(c);
+            } else {
+                if (numBuilder.length() > 0) {
+                    Tokens.append(numBuilder.toString());
+                    numBuilder.setLength(0); // Reset the StringBuilder
+                }
+                if (!Character.isWhitespace(c)) {
+                    Tokens.append(Character.toString(c));
+                }
+            }
         }
 
+        if (numBuilder.length() > 0) {
+            Tokens.append(numBuilder.toString());
+        }
     }
+
 
     /*
      * 1.  While there are tokens to be read:
@@ -49,41 +96,34 @@ public class ShuntingYard {
     //take the tokens from Tokens queue, and stored the reversed polish expression in ReversePolish queue
     public void process(){
 
-        Map<Character, Integer> precedence = new HashMap<>();
-        precedence.put('+', 1);
-        precedence.put('-', 1);
-        precedence.put('*', 2);
-        precedence.put('/', 2);
-        int size = this.Tokens.getLength();
-        Node node = this.Tokens.Head;
-        while (true)
-        {
-            String stringToken = node.Data;
-            char charToken = stringToken.charAt(0);
-            node = node.NextNode;
+        Node<String> currentNode = Tokens.Head;
+        for (int i = 0; i < Tokens.Size; i++) {
 
-            if (node.NextNode == null)
-            {
-                break;
-            }
-            // char c = stringToken.charAt(0);
-            if (Character.isDigit(stringToken.charAt(0))) {
-                ReversePolish.append(stringToken);
-            } else if ( charToken == '(') {
-                operatorStack.append(stringToken);
-            } else if (charToken == ')') {
-                while (!operatorStack.isEmpty() && operatorStack.peek().Data.charAt(0) != '(') {
-                    ReversePolish.append(operatorStack.pop().Data);
-                }
-                operatorStack.pop(); // Discard '('
-            } else if (precedence.containsKey(stringToken.charAt(0))) {
-                while (!operatorStack.isEmpty() && precedence.get(stringToken.charAt(0)) <= precedence.getOrDefault(operatorStack.peek().Data.charAt(0), 0)) {
-                    ReversePolish.append(operatorStack.pop().Data);
-                }
-                operatorStack.push(stringToken);
-            }
+            String token = currentNode.Data;
+            currentNode = currentNode.NextNode;
 
+            if (isNumeric(token)) {
+                ReversePolish.enqueue(token); // Add numbers directly to the output queue
+            } else if (isOperator(token.charAt(0))) {
+                char currentOperator = token.charAt(0);
+                while (!operatorStack.isEmpty() && precedence(operatorStack.peek().Data) >= precedence(currentOperator)) {
+                    ReversePolish.enqueue(Character.toString(operatorStack.pop().Data));
+                }
+                operatorStack.push(currentOperator);
+            } else if (token.equals("(")) {
+                operatorStack.push('(');
+            } else if (token.equals(")")) {
+                while (!operatorStack.isEmpty() && operatorStack.peek().Data != '(') {
+                    ReversePolish.enqueue(Character.toString(operatorStack.pop().Data));
+                }
+                operatorStack.pop(); // Discard the '('
+            }
         }
+
+        while (!operatorStack.isEmpty()) {
+            ReversePolish.enqueue(Character.toString(operatorStack.pop().Data));
+        }
+
     }
 
     /*
@@ -96,9 +136,28 @@ public class ShuntingYard {
      */
     //process use the reverse polish format of expression to process the math result
     //output: the math result of the expression
+    private int charDigitToInt(char c)
+    {
+        return c - '0';
+    }
     public int run(){
-        //to do
-        throw new Error("waiting for implement");
+        Stack<Integer> evaluationStack = new Stack<>();
+        Node<String> currentNode = ReversePolish.Head;
+        for (int i = 0; i < ReversePolish.Size; i++) {
+
+            String token = currentNode.Data;
+            currentNode = currentNode.NextNode;
+            if (isNumeric(token)) {
+                evaluationStack.push(Integer.parseInt(token));
+            } else if (isOperator(token.charAt(0))) {
+                int operand2 = evaluationStack.pop().Data;
+                int operand1 = evaluationStack.pop().Data;
+                int result = performOperation(token.charAt(0), operand1, operand2);
+                evaluationStack.push(result);
+            }
+        }
+
+        return evaluationStack.pop().Data;
     }
 
     

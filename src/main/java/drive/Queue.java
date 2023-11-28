@@ -1,8 +1,26 @@
 package drive;
-public abstract class Queue extends LinkedList {
-    public abstract void enqueue(String data);
 
-    public abstract Node dequeue();
+public class Queue<T> extends LinkedList<T> {
 
-    public abstract Node peek();
+    public void enqueue(T data) {
+        append(data);
+    }
+
+    public Node<T> dequeue() {
+        if (isEmpty()) {
+            return null;
+        }
+
+        Node<T> dequeuedNode = this.Head;
+        removeHead();
+        return dequeuedNode;
+    }
+
+    public Node<T> peek() {
+        if (isEmpty()) {
+            return null;
+        }
+
+        return this.Head;
+    }
 }

@@ -1,8 +1,8 @@
 package drive;
 
-public class LinkedList {
-    public Node Head;
-    public Node Tail;
+public class LinkedList<T> {
+    public Node<T> Head;
+    public Node<T> Tail;
     public int Size;
 
     public LinkedList(){
@@ -11,8 +11,8 @@ public class LinkedList {
         this.Size = 0;
     }
 
-    public void append(String data){
-        Node newNode = new Node(data);
+    public void append(T data){
+        Node<T> newNode = new Node<T>(data);
         if (this.Size == 0){
             this.Head = this.Tail = newNode;
         } else {
@@ -23,8 +23,8 @@ public class LinkedList {
         this.Size++;
     }
 
-    public void prepend(String data){
-        Node newNode = new Node(data);
+    public void prepend(T data){
+        Node<T> newNode = new Node<T>(data);
         if (this.Size == 0){
             this.Head = this.Tail = newNode;
         } else {
@@ -37,7 +37,7 @@ public class LinkedList {
 
     public void removeTail(){
         if (this.Size > 1){
-            Node newTail = this.Tail.PreviousNode;
+            Node<T> newTail = this.Tail.PreviousNode;
             newTail.NextNode = null;
             this.Tail.PreviousNode = null;
             this.Tail = newTail;
@@ -51,7 +51,7 @@ public class LinkedList {
 
     public void removeHead(){
         if (this.Size > 1){
-            Node newHead = this.Head.NextNode;
+            Node<T> newHead = this.Head.NextNode;
             newHead.PreviousNode = null;
             this.Head.NextNode = null;
             this.Head = newHead;
@@ -76,7 +76,7 @@ public class LinkedList {
         String output = "";
         Node node = this.Head;
         while(node != null){
-            output += node.Data;
+            output += node.Data + " ";
             node = node.NextNode;
         }
         return output;
